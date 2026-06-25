@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BATTLEAX 3.0 — Round Suggestion Form</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#0a0a0a;
+    --black-2:#121212;
+    --panel:#161214;
+    --red:#7a0f1c;
+    --red-bright:#b8202f;
+    --gold:#c9a961;
+    --gold-dim:#8a7340;
+    --ink:#e9e4d8;
+    --ink-dim:#9a948a;
+    --border:#2a2422;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  body{
+    background:var(--black);
+    color:var(--ink);
+    font-family:'Oswald',sans-serif;
+    min-height:100vh;
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(122,15,28,0.12) 0%, transparent 35%),
+      radial-gradient(circle at 85% 80%, rgba(122,15,28,0.10) 0%, transparent 40%);
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  /* faint vertical scan texture, AiB control-room feel */
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .suit-field{
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    pointer-events:none;
+    z-index:0;
+    opacity:0.05;
+  }
+  .suit-field span{
+    position:absolute;
+    font-size:64px;
+    color:var(--red-bright);
+  }
+
+  .wrap{
+    max-width:640px;
+    margin:0 auto;
+    padding:64px 20px 80px;
+    position:relative;
+    z-index:1;
+  }
+
+  /* ---------- header / game card ---------- */
+  .card-header{
+    border:1px solid var(--border);
+    background:linear-gradient(180deg, var(--panel) 0%, var(--black-2) 100%);
+    padding:36px 32px 32px;
+    position:relative;
+    border-top:3px solid var(--red);
+  }
+  .card-header::before,
+  .card-header::after{
+    content:'♠';
+    position:absolute;
+    font-size:18px;
+    color:var(--gold-dim);
+    opacity:0.6;
+  }
+  .card-header::before{ top:14px; left:16px; }
+  .card-header::after{ bottom:14px; right:16px; transform:rotate(180deg); }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--gold);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .eyebrow .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--red-bright);
+    box-shadow:0 0 6px var(--red-bright);
+    display:inline-block;
+  }
+
+  h1{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:42px;
+    letter-spacing:0.03em;
+    line-height:1.05;
+    color:var(--ink);
+    margin-bottom:6px;
+  }
+  h1 span{ color:var(--red-bright); }
+
+  .subhead{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    color:var(--gold-dim);
+    letter-spacing:0.08em;
+    margin-bottom:20px;
+    text-transform:uppercase;
+  }
+
+  .desc{
+    font-size:15px;
+    line-height:1.75;
+    color:var(--ink-dim);
+    max-width:540px;
+  }
+  .desc strong{ color:var(--ink); font-weight:500; }
+
+  /* ---------- sections ---------- */
+  .section{
+    margin-top:28px;
+    border:1px solid var(--border);
+    background:var(--panel);
+    padding:26px 28px;
+    position:relative;
+  }
+  .section-tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--red-bright);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:18px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--border);
+  }
+  .section-tag .suit{ color:var(--gold); font-size:13px; }
+
+  label{
+    display:block;
+    font-size:13px;
+    color:var(--ink);
+    margin-bottom:8px;
+    font-weight:500;
+    letter-spacing:0.01em;
+  }
+  label .req{ color:var(--red-bright); margin-left:3px; }
+  .hint{
+    font-size:11.5px;
+    color:var(--ink-dim);
+    margin-top:-4px;
+    margin-bottom:8px;
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  .field{ margin-bottom:20px; }
+  .field:last-child{ margin-bottom:0; }
+
+  input[type="text"],
+  textarea,
+  select{
+    width:100%;
+    background:var(--black-2);
+    border:1px solid var(--border);
+    color:var(--ink);
+    font-family:'Oswald', sans-serif;
+    font-size:14px;
+    padding:11px 14px;
+    transition:border-color 0.15s, box-shadow 0.15s;
+    border-radius:2px;
+  }
+  textarea{ resize:vertical; min-height:84px; line-height:1.6; }
+
+  input[type="text"]:focus,
+  textarea:focus,
+  select:focus{
+    outline:none;
+    border-color:var(--red-bright);
+    box-shadow:0 0 0 3px rgba(184,32,47,0.15);
+  }
+
+  input::placeholder, textarea::placeholder{
+    color:#5a5450;
+    font-size:13px;
+  }
+
+  /* custom radio / checkbox rows styled like game-card choices */
+  .choice-grid{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .choice-grid.cols-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .choice{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    border:1px solid var(--border);
+    background:var(--black-2);
+    padding:11px 14px;
+    cursor:pointer;
+    transition:border-color 0.15s, background 0.15s;
+    position:relative;
+  }
+  .choice:hover{
+    border-color:var(--gold-dim);
+  }
+  .choice input{
+    accent-color:var(--red-bright);
+    width:15px;height:15px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .choice span{
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .choice input:checked ~ span{ color:var(--gold); }
+  .choice:has(input:checked){
+    border-color:var(--red-bright);
+    background:rgba(122,15,28,0.12);
+  }
+
+  .skills-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  @media (max-width:480px){
+    .choice-grid.cols-2, .skills-grid{ grid-template-columns:1fr; }
+    h1{ font-size:34px; }
+    .card-header, .section{ padding:22px 18px; }
+  }
+
+  /* ---------- submit ---------- */
+  .submit-zone{
+    margin-top:32px;
+    text-align:center;
+  }
+  button.submit{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:18px;
+    letter-spacing:0.06em;
+    background:var(--red);
+    color:var(--ink);
+    border:1px solid var(--red-bright);
+    padding:16px 48px;
+    cursor:pointer;
+    transition:background 0.15s, transform 0.1s;
+    width:100%;
+  }
+  button.submit:hover{ background:var(--red-bright); }
+  button.submit:active{ transform:scale(0.99); }
+  button.submit:disabled{
+    opacity:0.5;
+    cursor:not-allowed;
+  }
+
+  .submit-note{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--ink-dim);
+    margin-top:14px;
+    letter-spacing:0.04em;
+  }
+
+  .error-text{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    color:var(--red-bright);
+    margin-top:6px;
+    display:none;
+  }
+  .field.has-error input,
+  .field.has-error textarea,
+  .field.has-error .choice-grid{
+    border-color:var(--red-bright);
+  }
+  .field.has-error .error-text{ display:block; }
+
+  /* ---------- success state ---------- */
+  .success-screen{
+    display:none;
+    border:1px solid var(--gold-dim);
+    background:var(--panel);
+    padding:48px 32px;
+    text-align:center;
+    margin-top:28px;
+  }
+  .success-screen .suit-big{
+    font-size:40px;
+    color:var(--gold);
+    margin-bottom:16px;
+  }
+  .success-screen h2{
+    font-family:'Bebas Neue', sans-serif;
+    font-size:28px;
+    color:var(--ink);
+    letter-spacing:0.03em;
+    margin-bottom:10px;
+  }
+  .success-screen p{
+    font-size:14px;
+    color:var(--ink-dim);
+    line-height:1.7;
+    max-width:420px;
+    margin:0 auto;
+  }
+
+  .footer-mark{
+    text-align:center;
+    margin-top:40px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:0.12em;
+    color:#4a4440;
+    text-transform:uppercase;
+  }
+</style>
+</head>
+<body>
+
+<div class="suit-field" aria-hidden="true">
+  <span style="top:8%; left:6%;">♠</span>
+  <span style="top:22%; left:88%;">♥</span>
+  <span style="top:48%; left:12%;">♣</span>
+  <span style="top:68%; left:80%;">♦</span>
+  <span style="top:85%; left:30%;">♠</span>
+  <span style="top:38%; left:55%;">♥</span>
+</div>
+
+<div class="wrap">
+
+  <div class="card-header">
+    <div class="eyebrow"><span class="dot"></span>Game card · round proposal</div>
+    <h1>BATTLEAX <span>3.0</span></h1>
+    <div class="subhead">Round suggestion form</div>
+    <p class="desc">
+      Every game needs a new rule. We're collecting ideas from <strong>players</strong> — for BATTLEAX 3.0, inspired by <strong>Alice in Borderland</strong>. Submit your round concepts, survival challenges, logic tasks, tech-based activities, or improvements to existing games. The strongest ideas make it into the arena.
+    </p>
+  </div>
+
+  <form id="battleaxForm" novalidate>
+
+    <div class="section">
+      <div class="section-tag"><span class="suit">♠</span>Player identity</div>
+      <div class="field">
+        <label for="fullName">Full name<span class="req">*</span></label>
+        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+        <div class="error-text">This field is required.</div>
+      </div>
+      <div class="field">
+        <label for="classSem">Class / Semester<span class="req">*</span></label>
+        <input type="text" id="classSem" name="classSem" placeholder="e.g. BCA 3rd semester" required>
+        <div class="error-text">This field is required.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-tag"><span class="suit">♣</span>Which game are you proposing for</div>
+      <div class="field">
+        <label for="eventRound">Which event or round is your suggestion for?<span class="req">*</span></label>
+        <input type="text" id="eventRound" name="eventRound" placeholder="e.g. IT Manager, Coding & Debugging, eFootball, or a brand-new round" required>
+        <div class="error-text">This field is required.</div>
+      </div>
+      <div class="field">
+        <label for="roundName">Suggest a round name<span class="req">*</span></label>
+        <input type="text" id="roundName" name="roundName" placeholder="Give your round a name worthy of the arena" required>
+        <div class="error-text">This field is required.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-tag"><span class="suit">♥</span>Type of suggestion</div>
+      <div class="field">
+        <div class="choice-grid" id="suggestionTypeGroup">
+          <label class="choice"><input type="radio" name="suggestionType" value="New Round Idea" required><span>New round idea</span></label>
+          <label class="choice"><input type="radio" name="suggestionType" value="Improvement to Existing Round"><span>Improvement to existing round</span></label>
+          <label class="choice"><input type="radio" name="suggestionType" value="New Event Idea"><span>New event idea</span></label>
+          <label class="choice"><input type="radio" name="suggestionType" value="Rule Change Suggestion"><span>Rule change suggestion</span></label>
+        </div>
+        <div class="error-text">Please select one option.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-tag"><span class="suit">♦</span>The concept</div>
+      <div class="field">
+        <label for="ideaDetail">Explain your idea in detail<span class="req">*</span></label>
+        <textarea id="ideaDetail" name="ideaDetail" placeholder="Describe the concept, the twist, and what makes it survival-worthy..." required></textarea>
+        <div class="error-text">This field is required.</div>
+      </div>
+      <div class="field">
+        <label for="conductMethod">How should the round be conducted?<span class="req">*</span></label>
+        <textarea id="conductMethod" name="conductMethod" placeholder="Format, stages, timing, materials needed, venue requirements..." required></textarea>
+        <div class="error-text">This field is required.</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-tag"><span class="suit">♠</span>Skills tested</div>
+      <div class="field">
+        <div class="hint">Select all that apply</div>
+        <div class="skills-grid">
+          <label class="choice"><input type="checkbox" name="skills" value="Logic"><span>Logic</span></label>
+          <label class="choice"><input type="checkbox" name="skills" value="Coding"><span>Coding</span></label>
+          <label class="choice"><input type="checkbox" name="skills" value="Communication"><span>Communication</span></label>
+          <label class="choice"><input type="checkbox" name="skills" value="Teamwork"><span>Teamwork</span></label>
+          <label class="choice"><input type="checkbox" name="skills" value="Creativity"><span>Creativity</span></label>
+          <label class="choice"><input type="checkbox" name="skills" value="Strategy"><span>Strategy</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-tag"><span class="suit">♣</span>Players required</div>
+      <div class="field">
+        <label>Individual or team-based?<span class="req">*</span></label>
+        <div class="choice-grid cols-2">
+          <label class="choice"><input type="radio" name="teamType" value="Individual" required><span>Individual</span></label>
+          <label class="choice"><input type="radio" name="teamType" value="Team-based"><span>Team-based</span></label>
+        </div>
+        <div class="error-text">Please select one option.</div>
+      </div>
+      <div class="field">
+        <label for="teamSize">If team-based, suggested team size</label>
+        <input type="text" id="teamSize" name="teamSize" placeholder="e.g. 3 players per team">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-tag"><span class="suit">♥</span>Make your case</div>
+      <div class="field">
+        <label for="fitReason">Why do you think this idea would fit BATTLEAX 3.0?<span class="req">*</span></label>
+        <textarea id="fitReason" name="fitReason" placeholder="Tie it back to the Alice in Borderland theme and the spirit of the fest..." required></textarea>
+        <div class="error-text">This field is required.</div>
+      </div>
+      <div class="field">
+        <label for="comments">Any additional comments</label>
+        <textarea id="comments" name="comments" placeholder="Optional — anything else the organizers should know" style="min-height:60px;"></textarea>
+      </div>
+    </div>
+
+    <div class="submit-zone">
+      <button type="submit" class="submit" id="submitBtn">Submit your card</button>
+      <div class="submit-note" id="submitNote">All fields marked * are required</div>
+    </div>
+
+  </form>
+
+  <div class="success-screen" id="successScreen">
+    <div class="suit-big">♠ ♥ ♣ ♦</div>
+    <h2>Card accepted</h2>
+    <p>Your suggestion has been logged into the game. The organizers will review it before the next round begins. Thank you for playing your part in BATTLEAX 3.0.</p>
+  </div>
+
+  <div class="footer-mark">Department of Computer Applications · Srinivas University</div>
+
+</div>
+
+<script>
+  // Replace this with your deployed Apps Script Web App URL
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx85_eAaYkhUD7F2_w9TWX2XOMtpcMhANmN3D1381xZdECUM9l2JKqB1PMZvMBIYN0/exec";
+
+  const form = document.getElementById('battleaxForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitNote = document.getElementById('submitNote');
+  const successScreen = document.getElementById('successScreen');
+
+  function clearErrors(){
+    document.querySelectorAll('.field').forEach(f => f.classList.remove('has-error'));
+  }
+
+  function validate(){
+    clearErrors();
+    let valid = true;
+
+    const requiredTextFields = ['fullName','classSem','eventRound','roundName','ideaDetail','conductMethod','fitReason'];
+    requiredTextFields.forEach(id => {
+      const el = document.getElementById(id);
+      if(!el.value.trim()){
+        el.closest('.field').classList.add('has-error');
+        valid = false;
+      }
+    });
+
+    if(!form.querySelector('input[name="suggestionType"]:checked')){
+      document.getElementById('suggestionTypeGroup').closest('.field').classList.add('has-error');
+      valid = false;
+    }
+
+    if(!form.querySelector('input[name="teamType"]:checked')){
+      document.querySelector('input[name="teamType"]').closest('.choice-grid').closest('.field').classList.add('has-error');
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    if(!validate()){
+      submitNote.textContent = "Some fields need your attention above";
+      submitNote.style.color = "var(--red-bright)";
+      return;
+    }
+
+    const skills = Array.from(form.querySelectorAll('input[name="skills"]:checked')).map(el => el.value).join(", ");
+
+    const payload = {
+      fullName: form.fullName.value.trim(),
+      classSem: form.classSem.value.trim(),
+      eventRound: form.eventRound.value.trim(),
+      roundName: form.roundName.value.trim(),
+      suggestionType: form.querySelector('input[name="suggestionType"]:checked').value,
+      ideaDetail: form.ideaDetail.value.trim(),
+      conductMethod: form.conductMethod.value.trim(),
+      skills: skills,
+      teamType: form.querySelector('input[name="teamType"]:checked').value,
+      teamSize: form.teamSize.value.trim(),
+      fitReason: form.fitReason.value.trim(),
+      comments: form.comments.value.trim(),
+      timestamp: new Date().toISOString()
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Logging your card...";
+    submitNote.textContent = "Sending to the organizers";
+    submitNote.style.color = "var(--ink-dim)";
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if(data.result === 'success'){
+        form.style.display = 'none';
+        successScreen.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        throw new Error(data.error || 'Unknown error');
+      }
+    })
+    .catch(err => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit your card";
+      submitNote.textContent = "Submission failed — check your connection and try again";
+      submitNote.style.color = "var(--red-bright)";
+      console.error('Submission error:', err);
+    });
+  });
+</script>
+
+</body>
+</html>
